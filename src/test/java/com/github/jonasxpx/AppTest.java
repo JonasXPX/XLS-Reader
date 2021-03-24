@@ -1,20 +1,31 @@
 package com.github.jonasxpx;
 
-import static org.junit.Assert.assertTrue;
+import com.github.jonasxpx.facade.SheetBuilder;
+import com.github.jonasxpx.facade.WorkBuilder;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
+import java.util.Set;
 
-/**
- * Unit test for simple App.
- */
-public class AppTest 
-{
-    /**
-     * Rigorous Test :-)
-     */
+import static org.junit.jupiter.api.Assertions.*;
+
+public class AppTest {
+
     @Test
-    public void shouldAnswerWithTrue()
-    {
-        assertTrue( true );
+    public void shouldAnswerWithTrue() {
+        WorkBuilder.create("extrato.xls");
+
+        Set<Sheet> sheets = WorkBuilder.getInstance()
+                .getSheet();
+
+        assertEquals(1, sheets.size());
+        Sheet sheet = sheets.iterator().next();
+
+        assertNotNull(sheet);
+
+        SheetBuilder instance = SheetBuilder.getInstance();
+
+        MyModal read = instance.read(MyModal.class);
+        System.out.println(read.toString());
     }
 }
