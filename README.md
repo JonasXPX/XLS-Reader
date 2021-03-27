@@ -24,7 +24,7 @@ Basicamente, um arquivo XLS, são colunas e linhas, com uma identificação de c
 
 ```
 
-Tradezindo essa planilha, temos o seguinte Classe a ser definida:
+Tradezindo essa planilha, temos a seguinte Classe a ser definida:
 
 ```java
 @SheetObject(
@@ -41,6 +41,6 @@ class Inflacao {
  @ColumnIdentify(cellName = "ipca")
  private String ipca;
  
- //Getters and Setters
+ //Getters and Setters required
 }
 ```
