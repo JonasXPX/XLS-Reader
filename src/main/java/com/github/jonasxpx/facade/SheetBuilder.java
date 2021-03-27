@@ -6,6 +6,7 @@ import com.github.jonasxpx.exception.ReaderException;
 import com.github.jonasxpx.reader.CellLocation;
 import lombok.SneakyThrows;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -16,6 +17,7 @@ import java.util.*;
 
 import static java.lang.String.format;
 import static org.apache.log4j.config.PropertyPrinter.capitalize;
+import static org.apache.poi.ss.usermodel.CellType.*;
 
 public class SheetBuilder {
 
@@ -67,33 +69,39 @@ public class SheetBuilder {
             Class<?> newEntityClazz = entity.getClass();
 
             for (CellLocation cellLocation : cellLocations) {
-                if (row < cellLocation.getRow()) {
-                    continue;
-                }
-
-                Object value;
-
-                Optional<Row> nullableRow = Optional.ofNullable(sheet.getRow(cellLocation.getRow() + row));
-                if(nullableRow.isEmpty()) {
-                    continue;
-                }
-                Cell cell = nullableRow.get().getCell(cellLocation.getColumn());
-
-                try {
-                    value = cell.getStringCellValue();
-                } catch (Exception e) {
-                    value = cell.getNumericCellValue();
-                }
-
-                defineMethodValue(newEntity, newEntityClazz, cellLocation.getField(), value);
+                readAllFieldsFromRow(sheet, row, newEntity, newEntityClazz, cellLocation);
             }
 
             entities.add(newEntity);
 
         }
 
-
         return entities;
+    }
+
+    private <T> void readAllFieldsFromRow(Sheet sheet, int row, T newEntity, Class<?> newEntityClazz, CellLocation cellLocation)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        if (row < cellLocation.getRow()) {
+            return;
+        }
+
+        Optional<Row> nullableRow = Optional.ofNullable(sheet.getRow(cellLocation.getRow() + row));
+        if (nullableRow.isEmpty()) {
+            return;
+        }
+
+        Cell cell = nullableRow.get().getCell(cellLocation.getColumn());
+        Object valueFromCell = null;
+
+        if(cell.getCellType().equals(NUMERIC)) {
+            valueFromCell = cell.getNumericCellValue();
+        }
+
+        if(cell.getCellType().equals(STRING)) {
+            valueFromCell = cell.getStringCellValue();
+        }
+
+        defineMethodValue(newEntity, newEntityClazz, cellLocation.getField(), valueFromCell);
     }
 
     private <T> void defineMethodValue(T entity, Class<?> entityClzz, Field field, Object value)
@@ -112,12 +120,16 @@ public class SheetBuilder {
         while (currentRow != Math.min(sheet.getLastRowNum(), sheetObject.endAtRow())) {
             while (currentColumn != sheetObject.endAtColumn()) {
                 Optional<Cell> cell = Optional.ofNullable(sheet.getRow(currentRow).getCell(currentColumn));
-                if (cell.isPresent()) {
-                    boolean founded = cell.get().getStringCellValue().equalsIgnoreCase(columnIdentify.cellName());
-                    if (founded) {
-                        return new CellLocation(currentRow, currentColumn, columnIdentify, field);
-                    }
+
+                if (cell.isEmpty()) {
+                    continue;
                 }
+
+                boolean founded = cell.get().getStringCellValue().equalsIgnoreCase(columnIdentify.cellName());
+                if (founded) {
+                    return new CellLocation(currentRow, currentColumn, columnIdentify, field);
+                }
+
                 currentColumn++;
             }
             currentColumn = sheetObject.startAtColumn();
