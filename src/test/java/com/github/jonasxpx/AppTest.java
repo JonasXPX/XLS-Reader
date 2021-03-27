@@ -5,14 +5,15 @@ import com.github.jonasxpx.facade.WorkBuilder;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AppTest {
+class AppTest {
 
     @Test
-    public void shouldAnswerWithTrue() {
+    void shouldAnswerWithTrue() {
         WorkBuilder.create("extrato.xls");
 
         Set<Sheet> sheets = WorkBuilder.getInstance()
@@ -25,7 +26,22 @@ public class AppTest {
 
         SheetBuilder instance = SheetBuilder.getInstance();
 
-        MyModal read = instance.read(MyModal.class);
-        System.out.println(read.toString());
+        List<MyModal> read = instance.read(MyModal.class);
+
+        assertNotEquals(0, read.size());
+
+        MyModal modal = read.iterator().next();
+
+        assertNotNull(modal);
+        assertNotNull(modal.getCategoria());
+        assertNotNull(modal.getConcesionaria());
+        assertNotNull(modal.getCategoriaCadastrada());
+        assertNotNull(modal.getDataProcessamento());
+        assertNotNull(modal.getDataPassagem());
+        assertNotNull(modal.getDescricao());
+        assertNotNull(modal.getIdConcessionaria());
+        assertNotNull(modal.getIdPlaca());
+
+        System.out.println(read.size());
     }
 }

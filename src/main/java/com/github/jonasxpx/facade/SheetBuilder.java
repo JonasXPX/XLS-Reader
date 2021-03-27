@@ -2,18 +2,17 @@ package com.github.jonasxpx.facade;
 
 import com.github.jonasxpx.anotations.ColumnIdentify;
 import com.github.jonasxpx.anotations.SheetObject;
+import com.github.jonasxpx.exception.ReaderException;
 import com.github.jonasxpx.reader.CellLocation;
 import lombok.SneakyThrows;
-import org.apache.commons.codec.binary.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.util.StringUtil;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.String.format;
 import static org.apache.log4j.config.PropertyPrinter.capitalize;
@@ -41,38 +40,72 @@ public class SheetBuilder {
     }
 
     @SneakyThrows
-    public <T> T read(Class<T> clazz) {
+    public <T> List<T> read(Class<T> clazz) {
         WorkBuilder workBuilder = WorkBuilder.getInstance();
         Set<Sheet> sheets = workBuilder.getSheet();
         Sheet sheet = sheets.iterator().next();
+
         T entity = clazz.getConstructor().newInstance();
         Class<?> entityClass = entity.getClass();
+
         SheetObject annotation = entityClass.getAnnotation(SheetObject.class);
+        Set<CellLocation> cellLocations = new HashSet<>();
 
         for (Field declaredField : entityClass.getDeclaredFields()) {
             ColumnIdentify columnIdentify = declaredField.getAnnotation(ColumnIdentify.class);
-            if (Objects.nonNull(columnIdentify)) {
-                CellLocation cellLocation = searchColumnIdentify(sheet, annotation, columnIdentify);
 
-                String methodName = format("get%s", capitalize(declaredField.getName()));
+            if (Objects.isNull(columnIdentify)) continue;
 
-                Method setPlaca = entityClass.getDeclaredMethod(methodName, cellLocation.getType());
-                setPlaca.setAccessible(true);
+            CellLocation cellLocation = searchColumnIdentify(sheet, annotation, columnIdentify, declaredField);
+            cellLocations.add(cellLocation);
+        }
 
-                readCellLocation(sheet, cellLocation);
+        List<T> entities = new ArrayList<>();
 
+        for (int row = annotation.startAtRow(); row <= annotation.endAtRow(); row++) {
+            T newEntity = clazz.getConstructor().newInstance();
+            Class<?> newEntityClazz = entity.getClass();
+
+            for (CellLocation cellLocation : cellLocations) {
+                if (row < cellLocation.getRow()) {
+                    continue;
+                }
+
+                Object value;
+
+                Optional<Row> nullableRow = Optional.ofNullable(sheet.getRow(cellLocation.getRow() + row));
+                if(nullableRow.isEmpty()) {
+                    continue;
+                }
+                Cell cell = nullableRow.get().getCell(cellLocation.getColumn());
+
+                try {
+                    value = cell.getStringCellValue();
+                } catch (Exception e) {
+                    value = cell.getNumericCellValue();
+                }
+
+                defineMethodValue(newEntity, newEntityClazz, cellLocation.getField(), value);
             }
+
+            entities.add(newEntity);
+
         }
 
 
-        return entity;
+        return entities;
     }
 
-    private void readCellLocation(Sheet sheet, CellLocation cellLocation) {
+    private <T> void defineMethodValue(T entity, Class<?> entityClzz, Field field, Object value)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        String methodName = format("set%s", capitalize(field.getName()));
 
+        Method method = entityClzz.getDeclaredMethod(methodName, field.getType());
+
+        method.invoke(entity, value);
     }
 
-    private CellLocation searchColumnIdentify(Sheet sheet, SheetObject sheetObject, ColumnIdentify columnIdentify) {
+    private CellLocation searchColumnIdentify(Sheet sheet, SheetObject sheetObject, ColumnIdentify columnIdentify, Field field) {
         int currentRow = sheetObject.startAtRow();
         int currentColumn = sheetObject.startAtColumn();
 
@@ -80,9 +113,9 @@ public class SheetBuilder {
             while (currentColumn != sheetObject.endAtColumn()) {
                 Optional<Cell> cell = Optional.ofNullable(sheet.getRow(currentRow).getCell(currentColumn));
                 if (cell.isPresent()) {
-                    boolean founded = cell.get().getStringCellValue().equalsIgnoreCase(columnIdentify.value());
+                    boolean founded = cell.get().getStringCellValue().equalsIgnoreCase(columnIdentify.cellName());
                     if (founded) {
-                        return new CellLocation(currentRow, currentColumn, columnIdentify, String.class);
+                        return new CellLocation(currentRow, currentColumn, columnIdentify, field);
                     }
                 }
                 currentColumn++;
@@ -91,7 +124,7 @@ public class SheetBuilder {
             currentRow++;
         }
 
-        throw new RuntimeException(format("Não foi possível encontrar o identificador %s", columnIdentify.value()));
+        throw new ReaderException(format("Não foi possível encontrar o identificador %s", columnIdentify.cellName()));
     }
 
 }

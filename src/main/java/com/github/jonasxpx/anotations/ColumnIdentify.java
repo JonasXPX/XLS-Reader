@@ -9,11 +9,13 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface ColumnIdentify {
 
-    String value() default "";
+    String cellName();
+
+    String cellLocation() default "";
 
     Direction readDirection() default Direction.TO_BOTTOM;
 
-    public enum Direction {
+    enum Direction {
         TO_BOTTOM,
         TO_LEFT,
         TO_RIGHT,
