@@ -24,7 +24,7 @@ Basicamente, um arquivo XLS, são colunas e linhas, com uma identificação de c
 
 ```
 
-Tradezindo essa planilha, temos a seguinte Classe a ser definida:
+Traduzindo essa planilha, temos a seguinte Classe a ser definida:
 
 ```java
 @SheetObject(
