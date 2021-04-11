@@ -31,7 +31,7 @@ Tradezindo essa planilha, temos a seguinte Classe a ser definida:
         startAtColumn = 0,
         startAtRow = 0,
         endAtColumn = 2, // limite de 2 colunas
-        endAtRow = 5000 // limite de 5000 linhas
+        endAtRow = 5000 // limite de 5000 linhas //não obrigatório
 )
 class Inflacao {
 
