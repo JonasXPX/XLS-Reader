@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AppTest {
@@ -32,6 +33,8 @@ class AppTest {
 
         MyModal modal = read.iterator().next();
 
+        read.forEach(System.out::println);
+
         assertNotNull(modal);
         assertNotNull(modal.getCategoria());
         assertNotNull(modal.getConcesionaria());
@@ -42,6 +45,6 @@ class AppTest {
         assertNotNull(modal.getIdConcessionaria());
         assertNotNull(modal.getIdPlaca());
 
-        System.out.println(read.size());
+        System.out.printf("Object size: %s%n", read.size());
     }
 }

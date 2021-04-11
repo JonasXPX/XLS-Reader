@@ -2,13 +2,14 @@ package com.github.jonasxpx;
 
 import com.github.jonasxpx.anotations.ColumnIdentify;
 import com.github.jonasxpx.anotations.SheetObject;
+import com.github.jonasxpx.anotations.Transformer;
+import com.github.jonasxpx.facade.CustomTransformer;
 import lombok.*;
 
 @SheetObject(
         startAtColumn = 0,
         startAtRow = 6,
-        endAtColumn = 18,
-        endAtRow = 5000
+        endAtColumn = 18
 )
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,6 +28,7 @@ public class MyModal {
     private String placa;
 
     @ColumnIdentify(cellName = "Tipo")
+    @Transformer(value = CustomTransformer.class)
     private String tipo;
 
     @ColumnIdentify(cellName = "ID Concessionária")
