@@ -39,6 +39,7 @@ class Inflacao {
  private String mes;
  
  @ColumnIdentify(cellName = "ipca")
+ @Transformer(CustomUpperCaseTransformer.class)
  private String ipca;
  
  //Getters and Setters required
