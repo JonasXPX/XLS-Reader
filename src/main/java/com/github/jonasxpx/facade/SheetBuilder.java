@@ -6,7 +6,6 @@ import com.github.jonasxpx.exception.ReaderException;
 import com.github.jonasxpx.reader.CellLocation;
 import lombok.SneakyThrows;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -17,7 +16,8 @@ import java.util.*;
 
 import static java.lang.String.format;
 import static org.apache.log4j.config.PropertyPrinter.capitalize;
-import static org.apache.poi.ss.usermodel.CellType.*;
+import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
+import static org.apache.poi.ss.usermodel.CellType.STRING;
 
 public class SheetBuilder {
 
@@ -66,10 +66,9 @@ public class SheetBuilder {
 
         for (int row = annotation.startAtRow(); row <= annotation.endAtRow(); row++) {
             T newEntity = clazz.getConstructor().newInstance();
-            Class<?> newEntityClazz = entity.getClass();
 
             for (CellLocation cellLocation : cellLocations) {
-                readAllFieldsFromRow(sheet, row, newEntity, newEntityClazz, cellLocation);
+                readAllFieldsFromRow(sheet, row, newEntity, cellLocation);
             }
 
             entities.add(newEntity);
@@ -79,7 +78,7 @@ public class SheetBuilder {
         return entities;
     }
 
-    private <T> void readAllFieldsFromRow(Sheet sheet, int row, T newEntity, Class<?> newEntityClazz, CellLocation cellLocation)
+    private <T> void readAllFieldsFromRow(Sheet sheet, int row, T newEntity, CellLocation cellLocation)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         if (row < cellLocation.getRow()) {
             return;
@@ -101,7 +100,7 @@ public class SheetBuilder {
             valueFromCell = cell.getStringCellValue();
         }
 
-        defineMethodValue(newEntity, newEntityClazz, cellLocation.getField(), valueFromCell);
+        defineMethodValue(newEntity, newEntity.getClass(), cellLocation.getField(), valueFromCell);
     }
 
     private <T> void defineMethodValue(T entity, Class<?> entityClzz, Field field, Object value)
