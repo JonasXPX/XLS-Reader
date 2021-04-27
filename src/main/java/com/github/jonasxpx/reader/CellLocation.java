@@ -17,4 +17,5 @@ public class CellLocation {
     private int column;
     private ColumnIdentify columnIdentify;
     private Field field;
+    private boolean isFixed;
 }
