@@ -8,6 +8,7 @@ import com.github.jonasxpx.exception.ReaderException;
 import com.github.jonasxpx.reader.CellLocation;
 import lombok.SneakyThrows;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -57,7 +58,7 @@ public class SheetBuilder {
     public <T> List<T> read(Class<T> clazz) {
         WorkBuilder workBuilder = WorkBuilder.getInstance();
         Set<Sheet> sheets = workBuilder.getSheet();
-        Sheet sheet = sheets.iterator().next();
+        Sheet sheet = sheets.iterator().next(); // need future implementation
 
         T entity = clazz.getConstructor().newInstance();
         Class<?> entityClass = entity.getClass();
@@ -84,7 +85,7 @@ public class SheetBuilder {
             T newEntity = clazz.getConstructor().newInstance();
 
             for (CellLocation cellLocation : cellLocations) {
-                readAllFieldsFromRow(sheet, row, newEntity, cellLocation);
+                readAllFieldsFromRow(sheet, row, newEntity, cellLocation, true);
             }
 
             entities.add(newEntity);
@@ -95,11 +96,11 @@ public class SheetBuilder {
         return entities;
     }
 
-    private <T> void readAllFieldsFromRow(Sheet sheet, int row, T newEntity, CellLocation cellLocation) {
-        if (row < cellLocation.getRow()) {
+    private <T> void readAllFieldsFromRow(Sheet sheet, int row, T newEntity, CellLocation cellLocation, boolean isFixedRun) {
+        if(cellLocation.isFixed() && isFixedRun) {
+            readAllFieldsFromRow(sheet, 0, newEntity, cellLocation, false);
             return;
         }
-
         Optional<Row> nullableRow = Optional.ofNullable(sheet.getRow(cellLocation.getRow() + row));
         if (nullableRow.isEmpty()) {
             return;
@@ -141,6 +142,10 @@ public class SheetBuilder {
     }
 
     private CellLocation searchColumnIdentify(Sheet sheet, SheetObject sheetObject, ColumnIdentify columnIdentify, Field field) {
+        if (!columnIdentify.cellLocation().isBlank()) {
+           return readCellValue(columnIdentify, sheet, field);
+        }
+
         int currentRow = sheetObject.startAtRow();
         int currentColumn = sheetObject.startAtColumn();
 
@@ -161,6 +166,10 @@ public class SheetBuilder {
         throw new ReaderException(format("Não foi possível encontrar o identificador %s", columnIdentify.cellName()));
     }
 
+    private CellLocation readCellValue(ColumnIdentify columnIdentify, Sheet sheet, Field field) {
+        return cellInnerFinder(sheet, columnIdentify, field);
+    }
+
     private CellLocation cellInnerFinder(Sheet sheet, SheetObject sheetObject,
                                          ColumnIdentify columnIdentify, Field field, int currentRow, int currentColumn) {
         while (currentColumn != sheetObject.endAtColumn()) {
@@ -170,14 +179,29 @@ public class SheetBuilder {
                 continue;
             }
 
-            boolean founded = cell.get().getStringCellValue().equalsIgnoreCase(columnIdentify.cellName());
+            Cell innerCell = cell.get();
+            boolean founded = false;
+            if (innerCell.getCellType().equals(STRING)) {
+                founded = innerCell.getStringCellValue().equalsIgnoreCase(columnIdentify.cellName());
+            }
+
             if (founded) {
-                return new CellLocation(currentRow, currentColumn, columnIdentify, field);
+                return new CellLocation(currentRow, currentColumn, columnIdentify, field, false);
             }
 
             currentColumn++;
         }
         return null;
+    }
+
+    private CellLocation cellInnerFinder(Sheet sheet, ColumnIdentify columnIdentify, Field field) {
+        String[] rowColumn = columnIdentify.cellLocation()
+                .split(";");
+
+        Cell value = sheet.getRow(Integer.parseInt(rowColumn[0]))
+                .getCell(Integer.parseInt(rowColumn[1]));
+
+        return new CellLocation(value.getRowIndex(), value.getColumnIndex(), columnIdentify, field, true);
     }
 
     private void clearEntries() {

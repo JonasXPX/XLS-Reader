@@ -4,7 +4,11 @@ import com.github.jonasxpx.anotations.ColumnIdentify;
 import com.github.jonasxpx.anotations.SheetObject;
 import com.github.jonasxpx.anotations.Transformer;
 import com.github.jonasxpx.facade.CustomTransformer;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @SheetObject(
         startAtColumn = 0,
@@ -16,7 +20,7 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-public class MyModal {
+public class RepomModal {
 
     @ColumnIdentify(cellName = "Data Processamento")
     private String dataProcessamento;
@@ -28,7 +32,7 @@ public class MyModal {
     private String placa;
 
     @ColumnIdentify(cellName = "Tipo")
-    @Transformer(value = CustomTransformer.class)
+//    @Transformer(value = CustomTransformer.class)
     private String tipo;
 
     @ColumnIdentify(cellName = "ID Concessionária")
@@ -64,6 +68,8 @@ public class MyModal {
     @ColumnIdentify(cellName = "concessionária")
     private String concesionaria;
 
-
+    @ColumnIdentify(cellName = "filtro", cellLocation = "1;4")
+    @Transformer(value = CustomTransformer.class)
+    private Dates filtro;
 
 }

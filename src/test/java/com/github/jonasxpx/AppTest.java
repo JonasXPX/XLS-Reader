@@ -5,8 +5,11 @@ import com.github.jonasxpx.facade.WorkBuilder;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,11 +30,11 @@ class AppTest {
 
         SheetBuilder instance = SheetBuilder.getInstance();
 
-        List<MyModal> read = instance.read(MyModal.class);
+        List<RepomModal> read = instance.read(RepomModal.class);
 
         assertNotEquals(0, read.size());
 
-        MyModal modal = read.iterator().next();
+        RepomModal modal = read.iterator().next();
 
         read.forEach(System.out::println);
 
@@ -47,4 +50,32 @@ class AppTest {
 
         System.out.printf("Object size: %s%n", read.size());
     }
+
+    @Test
+    void shouldSumValuesPasagem() {
+        WorkBuilder.create("extrato.xls");
+
+        SheetBuilder sheetBuilder = SheetBuilder.getInstance();
+        List<RepomModal> modals = sheetBuilder.read(RepomModal.class);
+        Predicate<RepomModal> filtroPassagem = repomModal -> Objects.nonNull(repomModal.getTipo()) && repomModal.getTipo().equalsIgnoreCase("passagem");
+
+        Double finalValor = modals.stream()
+                .filter(filtroPassagem)
+                .map(RepomModal::getValorPassagem)
+                .reduce(0D, (total, value) -> {
+                    if(value != null) {
+                        BigDecimal realValue = BigDecimal
+                                .valueOf(value)
+                                .multiply(BigDecimal.ONE.negate());
+                        return realValue.add(BigDecimal.valueOf(total))
+                                .doubleValue();
+                    }
+                    return total;
+                });
+
+        assertEquals(BigDecimal.valueOf(210857.02), BigDecimal.valueOf(finalValor));
+    }
+
+
+
 }
