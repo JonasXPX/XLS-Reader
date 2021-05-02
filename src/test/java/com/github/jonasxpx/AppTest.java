@@ -1,5 +1,7 @@
 package com.github.jonasxpx;
 
+import com.github.jonasxpx.customer.repom.RepomModal;
+import com.github.jonasxpx.customer.repom.TipoLancamento;
 import com.github.jonasxpx.facade.SheetBuilder;
 import com.github.jonasxpx.facade.WorkBuilder;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -11,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import static com.github.jonasxpx.customer.repom.TipoLancamento.PASSAGEM;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,7 +60,7 @@ class AppTest {
 
         SheetBuilder sheetBuilder = SheetBuilder.getInstance();
         List<RepomModal> modals = sheetBuilder.read(RepomModal.class);
-        Predicate<RepomModal> filtroPassagem = repomModal -> Objects.nonNull(repomModal.getTipo()) && repomModal.getTipo().equalsIgnoreCase("passagem");
+        Predicate<RepomModal> filtroPassagem = repomModal -> Objects.nonNull(repomModal.getTipo()) && repomModal.getTipo().equals(PASSAGEM);
 
         Double finalValor = modals.stream()
                 .filter(filtroPassagem)
@@ -75,6 +78,7 @@ class AppTest {
 
         assertEquals(BigDecimal.valueOf(210857.02), BigDecimal.valueOf(finalValor));
     }
+
 
 
 

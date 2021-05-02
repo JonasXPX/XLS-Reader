@@ -1,14 +1,22 @@
-package com.github.jonasxpx;
+package com.github.jonasxpx.customer.repom;
 
+import com.github.jonasxpx.Dates;
 import com.github.jonasxpx.anotations.ColumnIdentify;
 import com.github.jonasxpx.anotations.SheetObject;
 import com.github.jonasxpx.anotations.Transformer;
+import com.github.jonasxpx.customer.generic.Credit;
+import com.github.jonasxpx.customer.generic.MonthlyPayment;
+import com.github.jonasxpx.customer.repom.transformers.LocalDateTimeTransformer;
+import com.github.jonasxpx.customer.repom.transformers.TipoLancamentoTransformer;
 import com.github.jonasxpx.facade.CustomTransformer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.time.LocalDateTime;
+import java.util.Set;
 
 @SheetObject(
         startAtColumn = 0,
@@ -22,18 +30,22 @@ import lombok.ToString;
 @ToString
 public class RepomModal {
 
+    private Set<Credit> credits;
+    private Set<MonthlyPayment> monthlyPayments;
+
     @ColumnIdentify(cellName = "Data Processamento")
     private String dataProcessamento;
 
     @ColumnIdentify(cellName = "Data Passagem")
-    private String dataPassagem;
+    @Transformer(LocalDateTimeTransformer.class)
+    private LocalDateTime dataPassagem;
 
     @ColumnIdentify(cellName = "placa")
     private String placa;
 
     @ColumnIdentify(cellName = "Tipo")
-//    @Transformer(value = CustomTransformer.class)
-    private String tipo;
+    @Transformer(value = TipoLancamentoTransformer.class)
+    private TipoLancamento tipo;
 
     @ColumnIdentify(cellName = "ID Concessionária")
     private String idConcessionaria;

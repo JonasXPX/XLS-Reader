@@ -7,16 +7,19 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="extrato-read" />
+        <module name="extrato-reader" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="extrato-read" target="11" />
+      <module name="extrato-reader" target="11" />
+      <module name="prova2" target="1.8" />
       <module name="provas" target="11" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="prova2" options="-parameters" />
       <module name="provas" options="-parameters" />
     </option>
   </component>
