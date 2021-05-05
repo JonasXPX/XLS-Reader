@@ -54,32 +54,4 @@ class AppTest {
         System.out.printf("Object size: %s%n", read.size());
     }
 
-    @Test
-    void shouldSumValuesPasagem() {
-        WorkBuilder.create("extrato.xls");
-
-        SheetBuilder sheetBuilder = SheetBuilder.getInstance();
-        List<RepomModal> modals = sheetBuilder.read(RepomModal.class);
-        Predicate<RepomModal> filtroPassagem = repomModal -> Objects.nonNull(repomModal.getTipo()) && repomModal.getTipo().equals(PASSAGEM);
-
-        Double finalValor = modals.stream()
-                .filter(filtroPassagem)
-                .map(RepomModal::getValorPassagem)
-                .reduce(0D, (total, value) -> {
-                    if(value != null) {
-                        BigDecimal realValue = BigDecimal
-                                .valueOf(value)
-                                .multiply(BigDecimal.ONE.negate());
-                        return realValue.add(BigDecimal.valueOf(total))
-                                .doubleValue();
-                    }
-                    return total;
-                });
-
-        assertEquals(BigDecimal.valueOf(210857.02), BigDecimal.valueOf(finalValor));
-    }
-
-
-
-
 }

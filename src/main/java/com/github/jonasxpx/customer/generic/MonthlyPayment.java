@@ -3,7 +3,6 @@ package com.github.jonasxpx.customer.generic;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -11,11 +10,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MonthlyPayment {
+public class MonthlyPayment implements DefaultBill {
 
-    private LocalDateTime emission;
     private Long bill;
+    private LocalDateTime date;
     private String plate;
-    private LocalDateTime referenceDate;
+    private String dealership;
+    private String tollPlaza;
+    private String category;
+    private String tag;
     private BigDecimal value;
+    private boolean vp;
+    private LocalDateTime referenceDate;
+    
+
 }

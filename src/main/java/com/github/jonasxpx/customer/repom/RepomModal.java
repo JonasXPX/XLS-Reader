@@ -8,6 +8,7 @@ import com.github.jonasxpx.customer.generic.Credit;
 import com.github.jonasxpx.customer.generic.MonthlyPayment;
 import com.github.jonasxpx.customer.repom.transformers.LocalDateTimeTransformer;
 import com.github.jonasxpx.customer.repom.transformers.TipoLancamentoTransformer;
+import com.github.jonasxpx.customer.repom.transformers.ValorPassagemTransformer;
 import com.github.jonasxpx.facade.CustomTransformer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -68,8 +70,12 @@ public class RepomModal {
     @ColumnIdentify(cellName = "Marca Veículo")
     private String marcaVeiculo;
 
+    /**
+     * Valor multiplicado por -1
+     */
     @ColumnIdentify(cellName = "Valor Passagem")
-    private Double valorPassagem;
+    @Transformer(value = ValorPassagemTransformer.class)
+    private BigDecimal valorPassagem;
 
     @ColumnIdentify(cellName = "Valor Vale Pedagio")
     private Double valorValePedagio;

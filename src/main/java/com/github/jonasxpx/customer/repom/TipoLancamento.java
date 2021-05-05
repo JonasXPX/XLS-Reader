@@ -4,6 +4,8 @@ public enum TipoLancamento {
     ESTORNO_PASSAGEM,
     PASSAGEM,
     MENSALIDADE,
-    RECARGA
-
+    RECARGA,
+    CANCEL_CONTESTAÇÃO_VPR,
+    CANCEL_CONTESTAÇÃO,
+    CONTESTAÇÃO_VPR
 }

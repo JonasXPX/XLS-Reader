@@ -6,6 +6,7 @@ import com.github.jonasxpx.facade.SheetBuilder;
 import com.github.jonasxpx.facade.WorkBuilder;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -14,13 +15,18 @@ class LerFaturaRepom {
 
     @Test
     void shouldReadRepom() {
-        WorkBuilder.create("extrato.xls");
-        List<RepomModal> repomModals = SheetBuilder.getInstance().read(RepomModal.class);
+        File file = new File("faturas");
+        for (File faturas : file.listFiles()) {
 
-        Repom repom = new Repom(repomModals);
+            WorkBuilder.create(faturas.getAbsolutePath());
+            List<RepomModal> repomModals = SheetBuilder.getInstance().read(RepomModal.class);
 
-        assertFalse(repom.getCredits().isEmpty());
+            Repom repom = new Repom(repomModals);
 
-        System.out.println(repom.toString());
+            assertFalse(repom.getCredits().isEmpty());
+
+            System.out.println(faturas.getName());
+            System.out.println(repom.toString());
+        }
     }
 }
